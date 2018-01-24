@@ -47,14 +47,34 @@
     - fail: msg="{{ asc_file }} and {{ asc_file }}-2 checksums are different, ending."
       when: chksum_1.stat.checksum != chksum_2.stat.checksum
 
-    - name: install bitcoin-core gpg key
-      shell: "gpg2 --keyserver pgp.mit.edu --recv-keys 0x90C8019E36C2E964 2>/dev/null"
+    - name: import bitcoin-core public gpg key
+      command: "gpg2 --keyserver pgp.mit.edu --recv-keys 0x90C8019E36C2E964"
 
     - name: "downloading {{ archive_name }}"
       get_url:
         url: "{{ host1 + path_prefix + version + '/' + archive_name }}"
         dest: "{{ bitcoin_dir }}/{{ archive_name }}"
         mode: 0644
+
+    - name: check sha256 checksum
+      shell: "sha256sum --check --ignore-missing --status {{ asc_file }}"
+      args:
+        chdir: "{{ bitcoin_dir }}"
+      register: sha256_result
+
+    - name: show sha256_result
+      debug:
+        msg: "{{ sha256_result }}"
+
+    - name: validate signature is good
+      shell: "gpg2 --quiet --verify {{ asc_file }}"
+      args:
+        chdir: "{{ bitcoin_dir }}"
+      register: verify_result
+
+    - name: show verify_result
+      debug:
+        msg: "{{ verify_result }}"
 
     - name: "find {{ archive_name }} string in {{ asc_file }}"
       shell: "grep {{ archive_name }} {{ asc_file }} | awk '{print $1}'"
