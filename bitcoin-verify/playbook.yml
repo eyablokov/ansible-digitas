@@ -44,11 +44,7 @@
         get_checksum: yes
       register: chksum_2
 
-    - block:
-        - name: end if files have changes
-          debug:
-            msg: "{{ asc_file }} and {{ asc_file }}-2 checksums are different, ending"
-        - meta: end_play
+    - fail: msg="{{ asc_file }} and {{ asc_file }}-2 checksums are different, ending."
       when: chksum_1.stat.checksum != chksum_2.stat.checksum
 
     - name: install bitcoin-core gpg key
@@ -72,11 +68,7 @@
         chdir: "{{ bitcoin_dir }}"
       register: archive_chksum
 
-    - block:
-        - name: "comparing checksums"
-          debug:
-            msg: "value {{ grep_output }} from {{ asc_file }} and {{ archive_chksum }} of the downloaded {{ archive_name }} are different, ending"
-        - meta: end_play
+    - fail: msg="value {{ grep_output }} from {{ asc_file }} and {{ archive_chksum }} of the downloaded {{ archive_name }} are different, ending."
       when: grep_output.stdout != archive_chksum.stdout
 
     - name: "unpack {{ archive_name }} into {{ bitcoin_dir }}"
