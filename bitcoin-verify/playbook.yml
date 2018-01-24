@@ -23,7 +23,7 @@
     - name: "downloading {{ asc_file }} from {{ host1 }}"
       get_url:
         url: "{{ host1 + path_prefix + version + '/' + asc_file }}"
-        dest: "{{ bitcoin_dir }}/{{ asc_file }}-1"
+        dest: "{{ bitcoin_dir }}/{{ asc_file }}"
         mode: 0644
 
     - name: "downloading {{ asc_file }} from {{ host2 }}"
@@ -32,9 +32,9 @@
         dest: "{{ bitcoin_dir }}/{{ asc_file }}-2"
         mode: 0644
 
-    - name: "calculating checksum of {{ asc_file }}-1"
+    - name: "calculating checksum of {{ asc_file }}"
       stat:
-        path: "{{ bitcoin_dir }}/{{ asc_file }}-1"
+        path: "{{ bitcoin_dir }}/{{ asc_file }}"
         get_checksum: yes
       register: chksum_1
 
@@ -47,7 +47,7 @@
     - block:
         - name: end if files have changes
           debug:
-            msg: "{{ asc_file }}-1 and {{ asc_file }}-2 checksums are different, ending"
+            msg: "{{ asc_file }} and {{ asc_file }}-2 checksums are different, ending"
         - meta: end_play
       when: chksum_1.stat.checksum != chksum_2.stat.checksum
 
@@ -61,7 +61,7 @@
         mode: 0644
 
     - name: "find {{ archive_name }} string in {{ asc_file }}"
-      shell: "grep {{ archive_name }} {{ asc_file }}-1 | awk '{print $1}'"
+      shell: "grep {{ archive_name }} {{ asc_file }} | awk '{print $1}'"
       args:
         chdir: "{{ bitcoin_dir }}"
       register: grep_output
@@ -79,7 +79,7 @@
         - meta: end_play
       when: grep_output.stdout != archive_chksum.stdout
 
-    - name: unpack {{ archive_name }} into {{ bitcoin_dir }}
+    - name: "unpack {{ archive_name }} into {{ bitcoin_dir }}"
       unarchive:
         src: "{{ bitcoin_dir }}/{{ archive_name }}"
         dest: "{{ bitcoin_dir }}"
