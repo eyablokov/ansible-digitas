@@ -83,4 +83,5 @@
       unarchive:
         src: "{{ bitcoin_dir }}/{{ archive_name }}"
         dest: "{{ bitcoin_dir }}"
+        remote_src: yes
 
