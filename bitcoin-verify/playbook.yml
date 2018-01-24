@@ -57,14 +57,13 @@
         mode: 0644
 
     - name: check sha256 checksum
-      shell: "sha256sum --check --ignore-missing --status {{ asc_file }}"
+      shell: "sha256sum --check --ignore-missing {{ asc_file }}"
       args:
         chdir: "{{ bitcoin_dir }}"
       register: sha256_result
 
-    - name: show sha256_result
-      debug:
-        msg: "{{ sha256_result }}"
+    - fail: msg="sha256 checksum is not valid, ending."
+      when: sha256_result.rc != 0
 
     - name: validate signature is good
       shell: "gpg2 --quiet --verify {{ asc_file }}"
@@ -72,9 +71,8 @@
         chdir: "{{ bitcoin_dir }}"
       register: verify_result
 
-    - name: show verify_result
-      debug:
-        msg: "{{ verify_result }}"
+    - fail: msg="signature is not good, ending."
+      when: verify_result.rc != 0
 
     - name: "find {{ archive_name }} string in {{ asc_file }}"
       shell: "grep {{ archive_name }} {{ asc_file }} | awk '{print $1}'"
