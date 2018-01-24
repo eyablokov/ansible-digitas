@@ -52,7 +52,7 @@
       when: chksum_1.stat.checksum != chksum_2.stat.checksum
 
     - name: install bitcoin-core gpg key
-      shell: "gpg --keyserver pgp.mit.edu --recv-keys 0x90C8019E36C2E964 2>/dev/null"
+      shell: "gpg2 --keyserver pgp.mit.edu --recv-keys 0x90C8019E36C2E964 2>/dev/null"
 
     - name: "downloading {{ archive_name }}"
       get_url:
